@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { ProductService } from "src/app/services/product.service";
 import { Product } from "src/app/common/product";
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute } from "@angular/router";
 
 @Component({
   selector: "app-product-list",
@@ -12,8 +12,12 @@ export class ProductListComponent implements OnInit {
   id: number;
   products: Product[];
   currentCategoryId: number;
+  searchMode: boolean;
 
-  constructor(private productService: ProductService, private route: ActivatedRoute ) {}
+  constructor(
+    private productService: ProductService,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
     this.route.paramMap.subscribe(() => {
@@ -21,12 +25,31 @@ export class ProductListComponent implements OnInit {
     });
   }
 
-
   listProducts() {
+    this.searchMode = this.route.snapshot.paramMap.has(`keyword`);
+    if (this.searchMode) {
+      this.handleSearchProducts();
+    } else {
+      this.handleListProducts();
+    }
+  }
 
+  handleSearchProducts() {
+    const theKeyword: string = this.route.snapshot.paramMap.get(`keyword`);
+
+    // now searcjh for products for the given keyword
+    this.productService.searchProducts(theKeyword).subscribe(
+      data => {
+        this.products = data;
+      }
+    );
+
+  }
+
+  handleListProducts() {
     // check if "id" is available
     const hasCategoryId: boolean = this.route.snapshot.paramMap.has("id");
-    if(hasCategoryId) {
+    if (hasCategoryId) {
       // get the "id" param string. convert string to a number usin gthe "+" symbol
       this.currentCategoryId = +this.route.snapshot.paramMap.get("id");
     } else {
@@ -35,8 +58,10 @@ export class ProductListComponent implements OnInit {
     }
 
     // now get the products for the given category id
-    this.productService.getProductList(this.currentCategoryId).subscribe(data => {
-      this.products = data;
-    });
+    this.productService
+      .getProductList(this.currentCategoryId)
+      .subscribe(data => {
+        this.products = data;
+      });
   }
 }

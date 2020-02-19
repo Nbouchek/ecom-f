@@ -3,7 +3,7 @@ import { HttpClient } from "@angular/common/http";
 import { Product } from "../common/product";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
-import { ProductCategory } from '../common/product-category';
+import { ProductCategory } from "../common/product-category";
 
 @Injectable({
   providedIn: "root"
@@ -12,6 +12,12 @@ export class ProductService {
   private baseUrl = "http://localhost:8080/api/products";
   private categoryUrl = "http://localhost:8080/api/product_category";
   constructor(private httpClient: HttpClient) {}
+
+  getProduct(theProductId: number): Observable<Product> {
+    // build url based on product id
+    const productUrl = `${this.baseUrl}/${theProductId}`;
+    return this.httpClient.get<Product>(productUrl);
+  }
 
   private getProducts(searchUrl: string): Observable<Product[]> {
     return this.httpClient
@@ -26,7 +32,7 @@ export class ProductService {
   }
 
   searchProducts(theKeyword: string): Observable<Product[]> {
-        // need to build URL based on the category id
+    // need to build URL based on the category id
     const searchUrl = `${this.baseUrl}/search/findByNameContaining?name=${theKeyword}`;
     return this.getProducts(searchUrl);
   }
